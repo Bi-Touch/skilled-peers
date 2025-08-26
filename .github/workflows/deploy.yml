@@ -1,5 +1,139 @@
-name: Deploy
-on: [push]
+name: CI/CD — Skilled Peers (Next.js + Vercel)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+# Avoid overlapping runs on the same ref
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # 1) Build sanity check (type-check/lint/build) on every push/PR
   build:
+    name: Build
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Optional (uncomment if you have TypeScript & ESLint scripts)
+      # - name: Type check
+      #   run: npm run typecheck
+      # - name: Lint
+      #   run: npm run lint
+
+      - name: Create env file for build
+        run: |
+          cat > .env.production << 'EOF'
+          NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          CONTENTFUL_SPACE_ID=${{ secrets.CONTENTFUL_SPACE_ID }}
+          CONTENTFUL_ENVIRONMENT=${{ secrets.CONTENTFUL_ENVIRONMENT || 'master' }}
+          CONTENTFUL_ACCESS_TOKEN=${{ secrets.CONTENTFUL_ACCESS_TOKEN }}
+          CONTENTFUL_PREVIEW_TOKEN=${{ secrets.CONTENTFUL_PREVIEW_TOKEN }}
+          CONTENTFUL_PREVIEW_SECRET=${{ secrets.CONTENTFUL_PREVIEW_SECRET }}
+          CONTENTFUL_WEBHOOK_SECRET=${{ secrets.CONTENTFUL_WEBHOOK_SECRET }}
+          EOF
+
+      - name: Build (Next.js)
+        run: npm run build
+
+  # 2) Preview deployments for PRs
+  preview:
+    name: Deploy Preview (PR)
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Pull Vercel environment (preview)
+        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+
+      - name: Create env file for preview build
+        run: |
+          cat > .env.local << 'EOF'
+          NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          CONTENTFUL_SPACE_ID=${{ secrets.CONTENTFUL_SPACE_ID }}
+          CONTENTFUL_ENVIRONMENT=${{ secrets.CONTENTFUL_ENVIRONMENT || 'master' }}
+          CONTENTFUL_ACCESS_TOKEN=${{ secrets.CONTENTFUL_ACCESS_TOKEN }}
+          CONTENTFUL_PREVIEW_TOKEN=${{ secrets.CONTENTFUL_PREVIEW_TOKEN }}
+          CONTENTFUL_PREVIEW_SECRET=${{ secrets.CONTENTFUL_PREVIEW_SECRET }}
+          CONTENTFUL_WEBHOOK_SECRET=${{ secrets.CONTENTFUL_WEBHOOK_SECRET }}
+          EOF
+
+      - name: Build (preview)
+        run: vercel build --token=$VERCEL_TOKEN
+
+      - name: Deploy (preview)
+        run: vercel deploy --prebuilt --token=$VERCEL_TOKEN
+
+  # 3) Production deployment on push to main
+  deploy:
+    name: Deploy Production
+    needs: build
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Pull Vercel environment (production)
+        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Create env file for prod build
+        run: |
+          cat > .env.production << 'EOF'
+          NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          CONTENTFUL_SPACE_ID=${{ secrets.CONTENTFUL_SPACE_ID }}
+          CONTENTFUL_ENVIRONMENT=${{ secrets.CONTENTFUL_ENVIRONMENT || 'master' }}
+          CONTENTFUL_ACCESS_TOKEN=${{ secrets.CONTENTFUL_ACCESS_TOKEN }}
+          CONTENTFUL_PREVIEW_TOKEN=${{ secrets.CONTENTFUL_PREVIEW_TOKEN }}
+          CONTENTFUL_PREVIEW_SECRET=${{ secrets.CONTENTFUL_PREVIEW_SECRET }}
+          CONTENTFUL_WEBHOOK_SECRET=${{ secrets.CONTENTFUL_WEBHOOK_SECRET }}
+          EOF
+
+      - name: Build (prod)
+        run: vercel build --prod --token=$VERCEL_TOKEN
+
+      - name: Deploy (prod)
+        run: vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
