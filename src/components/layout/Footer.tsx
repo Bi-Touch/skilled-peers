@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-4 grid gap-8 md:grid-cols-3">
         {/* Brand */}
         <div>
-          <h2 className="text-xl font-bold">SkilledPeers</h2>
+          <h2 className="text-xl font-bold">Skilled Peers</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Think. Tinker. Deliver.
           </p>
@@ -44,7 +44,7 @@ export default function Footer() {
       </div>
 
       <div className="mt-10 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} SkilledPeers. All rights reserved.
+        © {new Date().getFullYear()} Skilled Peers. All rights reserved.
       </div>
     </footer>
   )

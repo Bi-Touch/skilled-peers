@@ -9,7 +9,7 @@ export default function Header() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="text-xl font-bold tracking-tight">
-          Skilled<span className="text-primary">Peers</span>
+          Skilled<span className="text-primary"> Peers</span>
         </Link>
 
         {/* Nav */}
