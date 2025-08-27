@@ -3,12 +3,18 @@
 import { Button } from "/src/components/ui/button";
 import Image from "next/image";
 
+interface HeroImage {
+  url: string;
+  title?: string;
+  description?: string;
+}
+
 interface HeroBlockProps {
   headline: string;
   subtext?: string;
   ctaText?: string;
   ctaLink?: string;
-  imageUrl?: string;
+  imageUrl?: HeroImage;
 }
 
 export function HeroBlock({
@@ -39,14 +45,15 @@ export function HeroBlock({
         </div>
 
         {/* Image content */}
-        {imageUrl && (
+        {imageUrl?.url && (
           <div className="mb-8 flex-1 md:mb-0">
             <Image
-              src={imageUrl}
-              alt="Hero illustration"
+              src={imageUrl.url}
+              alt={imageUrl.title || "Hero illustration"}
               width={500}
               height={400}
-              className="mx-auto rounded-lg shadow-lg"
+              className="mx-auto rounded-lg shadow-lg object-cover"
+              priority
             />
           </div>
         )}

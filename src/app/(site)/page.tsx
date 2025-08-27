@@ -1,15 +1,19 @@
-// src/app/(site)/page.tsx
 import { HeroBlock } from "/src/components/blocks/HeroBlock";
+import { fetchHeroBlock } from "/src/lib/contentful";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const heroBlock = await fetchHeroBlock();
+
+  if (!heroBlock) return null;
+
   return (
     <main>
       <HeroBlock
-        headline="Think. Tinker. Deliver."
-        subtext="At Skilled Peers, we help you unlock value with technology and innovation."
-        ctaText="Get Started"
-        ctaLink="/services"
-        imageUrl="/og-default.png" // can be swapped later
+        headline={heroBlock.headline}
+        subtext={heroBlock.subtext}
+        ctaText={heroBlock.ctaText}
+        ctaLink={heroBlock.ctaLink}
+        imageUrl={heroBlock.imageUrl} // ✅ directly typed
       />
     </main>
   );
