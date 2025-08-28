@@ -3,15 +3,22 @@
 import * as React from "react"
 import * as Toast from "@radix-ui/react-toast"
 
+let globalToast: ((msg: string) => void) | null = null
+
+export function toast(msg: string) {
+  globalToast?.(msg)
+}
+
 export function Toaster() {
   const [open, setOpen] = React.useState(false)
   const [message, setMessage] = React.useState("")
 
-  // helper: call this from anywhere
-  ;(window as any).toast = (msg: string) => {
-    setMessage(msg)
-    setOpen(true)
-  }
+  React.useEffect(() => {
+    globalToast = (msg: string) => {
+      setMessage(msg)
+      setOpen(true)
+    }
+  }, [])
 
   return (
     <Toast.Provider swipeDirection="right">

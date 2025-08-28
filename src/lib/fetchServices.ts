@@ -2,11 +2,11 @@ import { getClient } from "./client";
 
 const GET_SERVICES = /* GraphQL */ `
   query GetServices {
-    serviceCollection {
+    servicesCollection {
       items {
         slug
         title
-        summary
+        description
       }
     }
   }
@@ -15,7 +15,7 @@ const GET_SERVICES = /* GraphQL */ `
 export interface Service {
   slug: string; // ✅ required
   title: string;
-  summary?: string;
+  description?: string;
 }
 
 interface ServicesResponse {
@@ -25,5 +25,5 @@ interface ServicesResponse {
 export async function fetchServices(preview = false): Promise<Service[]> {
   const client = getClient(preview);
   const data = await client.request<ServicesResponse>(GET_SERVICES);
-  return data.serviceCollection.items;
+  return data.servicesCollection.items;
 }

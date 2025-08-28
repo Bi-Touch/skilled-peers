@@ -1,6 +1,6 @@
 // src/app/services/page.tsx
 import Link from "next/link";
-import { fetchServices, Service } from "@/src/lib/contentful";
+import { fetchServices, Service } from "/src/lib/contentful";
 
 export const revalidate = 60;
 
