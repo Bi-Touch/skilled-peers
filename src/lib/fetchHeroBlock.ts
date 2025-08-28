@@ -1,8 +1,7 @@
 import { getClient } from "./client";
 
-// GraphQL query for HeroBlock
-const GET_HERO_BLOCK = `
-  query {
+const GET_HERO_BLOCK = /* GraphQL */ `
+  query GetHeroBlock {
     heroBlockCollection(limit: 1) {
       items {
         slug
@@ -20,35 +19,34 @@ const GET_HERO_BLOCK = `
   }
 `;
 
-// TypeScript interface for HeroBlock
-export interface HeroBlock {
-  slug: string; // Always include slug for ISR
+export interface HeroImage {
+  url: string;
+  title?: string;
+  description?: string;
+}
+
+export interface HeroBlockData {
+  slug: string; // ✅ enforced
   headline: string;
   subtext?: string;
   ctaText?: string;
   ctaLink?: string;
-  imageUrl?: {
-    url: string;
-    title?: string;
-    description?: string;
-  };
+  imageUrl?: HeroImage;
 }
 
-// Fetch HeroBlock entry from Contentful
+interface HeroBlockResponse {
+  heroBlockCollection: { items: HeroBlockData[] };
+}
+
 export async function fetchHeroBlock(
   preview = false
-): Promise<HeroBlock | null> {
+): Promise<HeroBlockData | null> {
   try {
     const client = getClient(preview);
-    const data = await client.request(GET_HERO_BLOCK);
-
-    if (!data?.heroBlockCollection?.items?.length) {
-      return null;
-    }
-
-    return data.heroBlockCollection.items[0] as HeroBlock;
-  } catch (error) {
-    console.error("❌ Error fetching HeroBlock:", error);
+    const data = await client.request<HeroBlockResponse>(GET_HERO_BLOCK);
+    return data.heroBlockCollection.items[0] || null;
+  } catch (err) {
+    console.error("❌ Error fetching HeroBlock:", err);
     return null;
   }
 }

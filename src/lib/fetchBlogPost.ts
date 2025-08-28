@@ -1,52 +1,39 @@
 import { getClient } from "./client";
 
-const GET_BLOG_POST = `
+const GET_BLOG_POST = /* GraphQL */ `
   query GetBlogPost($slug: String!) {
     blogPostCollection(where: { slug: $slug }, limit: 1) {
       items {
         slug
         title
-        excerpt
-        content {
-          json
-        }
-        featuredImage {
+        content
+        date
+        coverImage {
           url(transform: { format: WEBP, quality: 80 })
           title
-          description
-        }
-        sys {
-          publishedAt
         }
       }
     }
   }
 `;
 
-export interface BlogPost {
-  slug: string;
+export interface BlogPostDetail {
+  slug: string; // ✅ required
   title: string;
-  excerpt?: string;
-  content?: {
-    json: any; // If you use rich text typings, replace with correct type
-  };
-  featuredImage?: {
-    url: string;
-    title?: string;
-    description?: string;
-  };
-  sys: {
-    publishedAt: string;
-  };
+  content?: string;
+  date?: string;
+  coverImage?: { url: string; title?: string };
 }
 
-export async function fetchBlogPost(slug: string, preview = false): Promise<BlogPost | null> {
+interface BlogPostResponse {
+  blogPostCollection: { items: BlogPostDetail[] };
+}
+
+export async function fetchBlogPost(
+  slug: string,
+  preview = false
+): Promise<BlogPostDetail | null> {
   const client = getClient(preview);
-  const data = await client.request(GET_BLOG_POST, { slug });
-
-  if (!data?.blogPostCollection?.items?.length) {
-    return null;
-  }
-
-  return data.blogPostCollection.items[0] as BlogPost;
+  const data = await client.request<BlogPostResponse>(GET_BLOG_POST, { slug });
+  return data.blogPostCollection.items[0] || null;
 }

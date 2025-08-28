@@ -1,44 +1,38 @@
 import { getClient } from "./client";
 
-const GET_BLOG_POSTS = `
+const GET_BLOG_POSTS = /* GraphQL */ `
   query GetBlogPosts {
-    blogPostCollection(order: sys_publishedAt_DESC) {
+    blogPostCollection(order: date_DESC) {
       items {
         slug
         title
         excerpt
-        featuredImage {
+        date
+        coverImage {
           url(transform: { format: WEBP, quality: 80 })
           title
-          description
-        }
-        sys {
-          id
-          publishedAt
         }
       }
     }
   }
 `;
 
-export interface BlogPostSummary {
-  slug: string;
+export interface BlogPost {
+  slug: string; // ✅ required
   title: string;
   excerpt?: string;
-  featuredImage?: {
-    url: string;
-    title?: string;
-    description?: string;
-  };
-  sys: {
-    id: string;
-    publishedAt: string;
-  };
+  date?: string;
+  coverImage?: { url: string; title?: string };
 }
 
-export async function fetchBlogPosts(preview = false): Promise<BlogPostSummary[]> {
-  const client = getClient(preview);
-  const data = await client.request(GET_BLOG_POSTS);
+interface BlogPostsResponse {
+  blogPostCollection: { items: BlogPost[] };
+}
 
-  return data?.blogPostCollection?.items ?? [];
+export async function fetchBlogPosts(
+  preview = false
+): Promise<BlogPost[]> {
+  const client = getClient(preview);
+  const data = await client.request<BlogPostsResponse>(GET_BLOG_POSTS);
+  return data.blogPostCollection.items;
 }

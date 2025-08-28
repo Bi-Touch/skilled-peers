@@ -1,62 +1,51 @@
-import { getClient } from "./client";
+// ========================================================
+// Barrel file to re-export all Contentful fetchers and types
+// ========================================================
 
-// GraphQL query for HeroBlock
-const GET_HERO_BLOCK = /* GraphQL */ `
-  query GetHeroBlock {
-    heroBlockCollection(limit: 1) {
-      items {
-        headline
-        subtext
-        ctaText
-        ctaLink
-        imageUrl {
-          url(transform: { format: WEBP, quality: 80 })
-          title
-          description
-        }
-      }
-    }
-  }
-`;
+// Hero Block
+export type { HeroImage, HeroBlockData } from "./fetchHeroBlock";
+export { fetchHeroBlock } from "./fetchHeroBlock";
 
-// Image type
-export interface HeroImage {
-  url: string;
-  title?: string;
-  description?: string;
-}
+// Blog
+export type { BlogPostDetail } from "./fetchBlogPost";
+export { fetchBlogPost } from "./fetchBlogPost";
 
-// Strongly typed HeroBlock
-export interface HeroBlockData {
-  headline: string;
-  subtext?: string;
-  ctaText?: string;
-  ctaLink?: string;
-  imageUrl?: HeroImage;
-}
+export type { BlogPost } from "./fetchBlogPosts";
+export { fetchBlogPosts } from "./fetchBlogPosts";
 
-// GraphQL response typing
-interface HeroBlockResponse {
-  heroBlockCollection: {
-    items: HeroBlockData[];
-  };
-}
+// Case Studies
+export type { CaseStudy } from "./fetchCaseStudies";
+export { fetchCaseStudies } from "./fetchCaseStudies";
 
-// Fetch HeroBlock entry from Contentful
-export async function fetchHeroBlock(
-  preview = false
-): Promise<HeroBlockData | null> {
-  try {
-    const client = getClient(preview);
-    const data = await client.request<HeroBlockResponse>(GET_HERO_BLOCK);
+// Industries
+export type { Industry } from "./fetchIndustries";
+export { fetchIndustries } from "./fetchIndustries";
 
-    if (!data?.heroBlockCollection?.items?.length) {
-      return null;
-    }
+// Services
+export type { Service } from "./fetchServices";
+export { fetchServices } from "./fetchServices";
 
-    return data.heroBlockCollection.items[0];
-  } catch (error) {
-    console.error("❌ Error fetching HeroBlock:", error);
-    return null;
-  }
-}
+// Jobs
+export type { Job } from "./fetchJobs";
+export { fetchJobs } from "./fetchJobs";
+
+// About Page
+export type { AboutPage } from "./fetchAboutPage";
+export { fetchAboutPage } from "./fetchAboutPage";
+
+// Contact Page
+export type { ContactPage } from "./fetchContactPage";
+export { fetchContactPage } from "./fetchContactPage";
+
+// ========================================================
+// Optional: Generic ContentfulEntry type for ISR revalidation
+// ========================================================
+export type ContentfulEntry =
+  | { __typename: "HeroBlock"; slug: string }
+  | { __typename: "BlogPost"; slug: string }
+  | { __typename: "CaseStudy"; slug: string }
+  | { __typename: "Industry"; slug: string }
+  | { __typename: "Service"; slug: string }
+  | { __typename: "Job"; slug: string }
+  | { __typename: "AboutPage"; slug: string }
+  | { __typename: "ContactPage"; slug: string };
