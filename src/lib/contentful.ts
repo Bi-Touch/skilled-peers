@@ -2,6 +2,9 @@
 // Barrel file to re-export all Contentful fetchers and types
 // ========================================================
 
+// Core client
+export { getClient } from "./client";
+
 // Hero Block
 export type { HeroImage, HeroBlockData } from "./fetchHeroBlock";
 export { fetchHeroBlock } from "./fetchHeroBlock";
@@ -22,8 +25,11 @@ export type { Industry } from "./fetchIndustries";
 export { fetchIndustries } from "./fetchIndustries";
 
 // Services
-export type { Service } from "./fetchServices";
+export type { ServiceListItem } from "./fetchServices";   // For list view
 export { fetchServices } from "./fetchServices";
+
+export type { Service } from "./fetchService";            // For detail view
+export { fetchService } from "./fetchService";
 
 // Jobs
 export type { Job } from "./fetchJobs";

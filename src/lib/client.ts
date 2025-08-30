@@ -22,11 +22,16 @@ if (!CPA_TOKEN) {
 }
 
 export function getClient(preview = false) {
+  const token = preview && CPA_TOKEN ? CPA_TOKEN : CDA_TOKEN;
+  const host = preview
+    ? "preview.contentful.com"
+    : "graphql.contentful.com";
+
   return new GraphQLClient(
-    `https://graphql.contentful.com/content/v1/spaces/${SPACE_ID}`,
+    `https://${host}/content/v1/spaces/${SPACE_ID}`,
     {
       headers: {
-        Authorization: `Bearer ${preview && CPA_TOKEN ? CPA_TOKEN : CDA_TOKEN}`,
+        Authorization: `Bearer ${token}`,
       },
     }
   );

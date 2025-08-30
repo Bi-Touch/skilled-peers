@@ -1,29 +1,42 @@
 import { getClient } from "./client";
+import { gql } from "graphql-request";
 
-const GET_SERVICES = /* GraphQL */ `
-  query GetServices {
-    servicesCollection {
+export const GET_SERVICES = gql`
+  query GetServices($limit: Int = 10) {
+    servicesCollection(limit: $limit) {
+      total
       items {
         slug
         title
         description
+        icon {
+          url
+          title
+        }
       }
     }
   }
 `;
 
-export interface Service {
-  slug: string; // ✅ required
+export type ServiceListItem = {
+  slug: string;
   title: string;
   description?: string;
-}
+  icon?: {
+    url: string;
+    title: string;
+  };
+};
 
-interface ServicesResponse {
-  serviceCollection: { items: Service[] };
-}
+type ServicesResponse = {
+  servicesCollection: {
+    total: number;
+    items: ServiceListItem[];
+  };
+};
 
-export async function fetchServices(preview = false): Promise<Service[]> {
-  const client = getClient(preview);
-  const data = await client.request<ServicesResponse>(GET_SERVICES);
+export async function fetchServices(limit = 10): Promise<ServiceListItem[]> {
+  const client = getClient(false);
+  const data = await client.request<ServicesResponse>(GET_SERVICES, { limit });
   return data.servicesCollection.items;
 }

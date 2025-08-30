@@ -1,25 +1,48 @@
-// src/app/services/page.tsx
+// src/app/(site)/services/page.tsx
+import { fetchServices } from "/src/lib/contentful";
 import Link from "next/link";
-import { fetchServices, Service } from "/src/lib/contentful";
-
-export const revalidate = 60;
+import Image from "next/image";
 
 export default async function ServicesPage() {
-  const services: Service[] = await fetchServices();
+  const services = await fetchServices();
 
   return (
-    <main className="container mx-auto py-16">
-      <h1 className="text-4xl font-bold mb-10">Our Services</h1>
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <section className="max-w-4xl mx-auto px-6 py-12">
+      <h1 className="text-3xl font-bold mb-8">Services</h1>
+      <div className="grid md:grid-cols-2 gap-8">
         {services.map((service) => (
-          <Link key={service.slug} href={`/services/${service.slug}`}>
-            <div className="p-6 border rounded-lg hover:shadow-lg transition">
-              <h2 className="text-2xl font-semibold">{service.title}</h2>
-              {service.description && <p className="mt-2 text-gray-600">{service.description}</p>}
-            </div>
-          </Link>
+          <div
+            key={service.slug}
+            className="p-6 border rounded-lg shadow hover:shadow-md transition"
+          >
+            {/* Show icon if available */}
+            {service.icon?.url && (
+              <div className="mb-4 flex justify-center">
+                <Image
+                  src={service.icon.url}
+                  alt={service.icon.title || service.title}
+                  width={64}
+                  height={64}
+                  className="object-contain"
+                />
+              </div>
+            )}
+
+            <h2 className="text-xl font-semibold mb-2">{service.title}</h2>
+
+            {service.description && (
+              <p className="text-gray-600 mb-4">{service.description}</p>
+            )}
+
+            <Link
+              href={`/services/${service.slug}`}
+              className="text-blue-600 font-medium hover:underline"
+            >
+              Learn More →
+            </Link>
+          </div>
         ))}
       </div>
-    </main>
+    </section>
   );
 }
