@@ -11,15 +11,15 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/(site)/services/page": [
+    "/(site)/industries/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(site)/services/page.js"
+      "static/chunks/app/(site)/industries/page.js"
     ],
-    "/(site)/services/[slug]/page": [
+    "/(site)/industries/[slug]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(site)/services/[slug]/page.js"
+      "static/chunks/app/(site)/industries/[slug]/page.js"
     ]
   }
 }

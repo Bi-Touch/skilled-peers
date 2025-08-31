@@ -1,29 +1,44 @@
 import { getClient } from "./client";
+import { gql } from "graphql-request";
 
-const GET_INDUSTRIES = /* GraphQL */ `
-  query GetIndustries {
-    industryCollection {
+export const GET_INDUSTRIES = gql`
+  query GetIndustries($limit: Int = 10) {
+    industryCollection(limit: $limit) {
+      total
       items {
         slug
-        name
+        title
         description
+        category
+        ogImage {
+          url
+          title
+        }
       }
     }
   }
 `;
 
-export interface Industry {
-  slug: string; // ✅ required
-  name: string;
+export interface IndustryListItem {
+  slug: string;
+  title: string;
   description?: string;
+  category?: string;
+  ogImage?: {
+    url: string;
+    title: string;
+  };
 }
 
 interface IndustriesResponse {
-  industryCollection: { items: Industry[] };
+  industryCollection: {
+    total: number;
+    items: IndustryListItem[];
+  };
 }
 
-export async function fetchIndustries(preview = false): Promise<Industry[]> {
-  const client = getClient(preview);
-  const data = await client.request<IndustriesResponse>(GET_INDUSTRIES);
+export async function fetchIndustries(limit = 10): Promise<IndustryListItem[]> {
+  const client = getClient(false);
+  const data = await client.request<IndustriesResponse>(GET_INDUSTRIES, { limit });
   return data.industryCollection.items;
 }

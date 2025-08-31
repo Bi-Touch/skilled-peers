@@ -25,6 +25,14 @@ interface SEOOptions {
 }
 
 /**
+ * Build static params for Next.js dynamic routes
+ * Example: [{ slug: "finance" }, { slug: "healthcare" }]
+ */
+export function buildStaticParams(items: { slug: string }[]) {
+  return items.map((item) => ({ slug: item.slug }));
+}
+
+/**
  * Generate Metadata for any Contentful type with slug/title/excerpt/body.
  */
 export function generateSEO(
@@ -36,7 +44,7 @@ export function generateSEO(
   const defaultTitle = options.defaultTitle || "Skilled Peers";
   const defaultDescription =
     options.defaultDescription ||
-    "Professional services and case studies from Skilled Peers.";
+    "Professional services, industries, and case studies from Skilled Peers.";
 
   if (!item) {
     return {
@@ -50,6 +58,7 @@ export function generateSEO(
   const excerpt =
     (item as any).excerpt ||
     (item as any).subtext ||
+    (item as any).description ||
     (item as any).body?.substring(0, 150) ||
     defaultDescription;
 
@@ -61,6 +70,9 @@ export function generateSEO(
       description: excerpt,
       url: `${baseUrl}/${contentType}/${slug}`,
       type: "article",
+      images: (item as any).ogImage
+        ? [{ url: (item as any).ogImage.url }]
+        : [],
     },
   };
 }
